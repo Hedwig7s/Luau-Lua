@@ -11,25 +11,30 @@ export class ParseOutput {
         const [row, column] = coordinate.split(",").map(Number);
         return [row, column];
     }
-    writeAtPosition(text: string, position: string|[number, number]) {
+    writeAtPosition(text: string, position: string|[number, number],insertNewlines = false) {
         let pos!: [number, number];
         if (typeof position === "string") {
             pos = this.parseCoordinate(position);
         } else {
             pos = position;
         }
+        let [row, col] = pos;
+        while (this.lines.length <= row) {
+            this.lines.push([]);
+        }
         for (const char of text) {
-            if (this.lines[pos[0]] === undefined) {
-                this.lines[pos[0]] = [];
-            }
             if (char === "\n") {
-                this.lines.splice(pos[0], 0, []);
-                pos[0]++;
-                pos[1] = 0;
+                if (insertNewlines) {
+                    this.lines.splice(row, 0, []);
+                } else {
+                    this.lines[row+1] = this.lines[row+1] ?? [];
+                }
+                row++;
+                col = 0;
                 continue;
             }
-            this.lines[pos[0]][pos[1]] = char;
-            pos[1]++;
+            this.lines[row][col] = char;
+            col++;
         }
     }
     append(text: string) {
